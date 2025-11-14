@@ -1,0 +1,247 @@
+# infrastructure/helm/globalpay/values.yaml
+global:
+  environment: production
+  namespace: globalpay
+  imageRegistry: gcr.io/YOUR_PROJECT
+  imagePullPolicy: Always
+
+# Payment Gateway Service
+paymentGateway:
+  enabled: true
+  name: payment-gateway
+  replicaCount: 3
+  image:
+    repository: payment-gateway
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/rate-limit: "100"
+    hosts:
+      - host: api.globalpay.example.com
+        paths:
+          - path: /api/v1/payments
+            pathType: Prefix
+    tls:
+      - secretName: globalpay-tls
+        hosts:
+          - api.globalpay.example.com
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+# Currency Conversion Service
+currencyService:
+  enabled: true
+  name: currency-conversion
+  replicaCount: 2
+  image:
+    repository: currency-conversion
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8081
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+
+# Fraud Detection Service
+fraudService:
+  enabled: true
+  name: fraud-detection
+  replicaCount: 2
+  image:
+    repository: fraud-detection
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8082
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 400m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+
+# Transaction Ledger Service
+ledgerService:
+  enabled: true
+  name: transaction-ledger
+  replicaCount: 2
+  image:
+    repository: transaction-ledger
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8083
+  resources:
+    requests:
+      cpu: 150m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+
+# PostgreSQL
+postgresql:
+  enabled: true
+  auth:
+    username: postgres
+    password: CHANGE_ME_IN_PROD
+    database: globalpay
+  primary:
+    persistence:
+      enabled: true
+      size: 20Gi
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+
+# Redis
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: CHANGE_ME_IN_PROD
+  master:
+    persistence:
+      enabled: true
+      size: 10Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+# MongoDB (for fraud rules)
+mongodb:
+  enabled: true
+  auth:
+    enabled: true
+    rootPassword: CHANGE_ME_IN_PROD
+    database: globalpay_fraud
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Kafka
+kafka:
+  enabled: true
+  replicaCount: 3
+  persistence:
+    enabled: true
+    size: 20Gi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+# Monitoring
+prometheus:
+  enabled: true
+  server:
+    persistentVolume:
+      enabled: true
+      size: 20Gi
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+
+grafana:
+  enabled: true
+  adminPassword: CHANGE_ME_IN_PROD
+  persistence:
+    enabled: true
+    size: 10Gi
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://prometheus-server
+          access: proxy
+          isDefault: true
+
+jaeger:
+  enabled: true
+  collector:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+  query:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 300m
+        memory: 512Mi
+
+# Network Policies
+networkPolicies:
+  enabled: true
+
+# Pod Security
+podSecurityPolicy:
+  enabled: true
+
+# Service Mesh (Optional)
+istio:
+  enabled: false
