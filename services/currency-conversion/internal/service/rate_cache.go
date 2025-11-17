@@ -1,4 +1,5 @@
 // services/currency-conversion/internal/service/rate_cache.go
+// Caching logic for exchange rates
 package service
 
 import (

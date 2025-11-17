@@ -1,4 +1,5 @@
 // services/fraud-detection/cmd/server/main.go
+// HTTP Server
 package main
 
 import (

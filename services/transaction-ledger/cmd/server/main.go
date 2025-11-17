@@ -1,4 +1,5 @@
 // services/transaction-ledger/cmd/server/main.go
+// HTTP server
 package main
 
 import (

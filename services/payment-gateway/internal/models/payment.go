@@ -1,4 +1,5 @@
 // services/payment-gateway/internal/models/payment.go
+// Data structures
 package models
 
 import "time"

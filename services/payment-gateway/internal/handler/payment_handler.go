@@ -1,4 +1,5 @@
 // services/payment-gateway/internal/handler/payment_handler.go
+// REST endpoints
 package handler
 
 import (

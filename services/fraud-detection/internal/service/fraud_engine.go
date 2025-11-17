@@ -1,4 +1,5 @@
 // services/fraud-detection/internal/service/fraud_engine.go
+// Fraud checks
 package service
 
 import (

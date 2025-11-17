@@ -1,4 +1,5 @@
 // services/payment-gateway/internal/service/payment_service.go
+// Business logic
 package service
 
 import (
